@@ -322,19 +322,68 @@ impl YieldTokenizer {
         // Get average yield of underlying at current timestamp
 
         // Deposit LSU amount into LSU token vault
-        // invoke()
+        invoke(
+            &spl_token::instruction::transfer(
+                token_program.key,
+                buyer_lsu_ata.key,
+                lsu_vault.key,
+                buyer.key,
+                &[],
+                amount,
+            )?,
+            &[
+                buyer.clone(),
+                buyer_lsu_ata.clone(),
+                lsu_vault.clone(),
+                token_program.clone(),
+            ],
+        )?;
 
         // Mint corresponding PT
-        // invoke_signed()
+        invoke_signed(
+            &spl_token::instruction::mint_to(
+                token_program.key,
+                pt_mint.key,
+                buyer_pt_ata.key,
+                buyer.key,
+                &[yield_tokenizer.key],
+                amount,
+            )?,
+            &[
+                buyer.clone(),
+                pt_mint.clone(),
+                buyer_pt_ata.clone(),
+                token_program.clone(),
+            ],
+            &[&[
+                crate::LSD_SEED,
+                yield_tokenizer_data.lsu_mint.as_ref(),
+                &yield_tokenizer_data.maturity_date.to_le_bytes(),
+            ]],
+        )?;
 
         // Mint corresponding YT
-        // invoke_signed()
-
-        // Transfer PT to buyer
-        //invoke_signed()
-
-        // Transfer YT to buyer
-        // invoke_signed()
+        invoke_signed(
+            &spl_token::instruction::mint_to(
+                token_program.key,
+                yt_mint.key,
+                buyer_yt_ata.key,
+                buyer.key,
+                &[yield_tokenizer.key],
+                amount,
+            )?,
+            &[
+                yt_mint.clone(),
+                buyer_yt_ata.clone(),
+                buyer.clone(),
+                yield_tokenizer.clone(),
+            ],
+            &[&[
+                crate::LSD_SEED,
+                yield_tokenizer_data.lsu_mint.as_ref(),
+                &yield_tokenizer_data.maturity_date.to_le_bytes(),
+            ]],
+        )?;
 
         // Update yield tokenizer state
         yield_tokenizer_data.serialize(&mut &mut yield_tokenizer.data.borrow_mut()[..])?;
@@ -355,6 +404,8 @@ impl YieldTokenizer {
         let pt_mint = next_account_info(accounts_iter)?;
         let yt_mint = next_account_info(accounts_iter)?;
         let lsu_vault = next_account_info(accounts_iter)?;
+        let pt_vault = next_account_info(accounts_iter)?;
+        let yt_vault = next_account_info(accounts_iter)?;
         let redeemer_lsu_ata = next_account_info(accounts_iter)?;
         let redeemer_pt_ata = next_account_info(accounts_iter)?;
         let redeemer_yt_ata = next_account_info(accounts_iter)?;
@@ -411,13 +462,43 @@ impl YieldTokenizer {
         }
 
         // Transfer PT
-        // invoke()
+        invoke(
+            &spl_token::instruction::transfer(
+                token_program.key,
+                redeemer_pt_ata.key,
+                pt_vault.key,
+                redeemer.key,
+                &[],
+                amount,
+            )?,
+            &[redeemer_yt_ata.clone(), pt_vault.clone(), redeemer.clone()],
+        )?;
 
         // Transfer YT
-        // invoke()
+        invoke(
+            &spl_token::instruction::transfer(
+                token_program.key,
+                redeemer_yt_ata.key,
+                yt_vault.key,
+                redeemer.key,
+                &[],
+                amount,
+            )?,
+            &[redeemer_yt_ata.clone(), yt_vault.clone(), redeemer.clone()],
+        )?;
 
         // Burn PT
-        // invoke_signed()
+        invoke_signed(
+            &spl_token::instruction::burn(
+                token_program.key,
+                pt_vault.key,
+                pt_mint.key,
+                &[yield_tokenizer.key],
+
+                
+                
+            )
+        )
 
         // Burn YT
         // invoke_signed()
@@ -567,6 +648,7 @@ impl YieldTokenizer {
         let lsu_mint = next_account_info(accounts_iter)?;
         let yt_mint = next_account_info(accounts_iter)?;
         let lsu_vault = next_account_info(accounts_iter)?;
+        let yt_vault = next_account_info(accounts_iter)?;
         let claimer_lsu_ata = next_account_info(accounts_iter)?;
         let claimer_yt_ata = next_account_info(accounts_iter)?;
         let token_program = next_account_info(accounts_iter)?;
@@ -619,24 +701,31 @@ impl YieldTokenizer {
         // Get accrued yield
 
         // Send YT to program
-        invoke(
-            &spl_token::instruction::transfer(
-                token_program.key,
-                claimer_yt_ata.key,
-                yt_vault.key,
-                claimer.key,
-                &[claimer.key],
-                amount,
-            )?,
-            &[
-                claimer_yt_ata.clone(),
-                yt_vault.clone(),
-                claimer.clone(),
-                token_program.clone(),
-            ],
-        )?;
+        // This seems to be erroneous logic since we want to be able to claim any tokens up till
+        // the unix_timestamp but the current logic implies we only collect at maturity
+        // It may be that we need to apply a wrapper around the YT token... fuck me
+        // invoke(
+        //     &spl_token::instruction::transfer(
+        //         token_program.key,
+        //         claimer_yt_ata.key,
+        //         yt_vault.key,
+        //         claimer.key,
+        //         &[claimer.key],
+        //     )?,
+        //     &[
+        //         claimer_yt_ata.clone(),
+        //         yt_vault.clone(),
+        //         claimer.clone(),
+        //         token_program.clone(),
+        //     ],
+        // )?;
 
-        // Program burns YT
+        // Program burns YT - which would mean no burning here????
+        // invoke_signed(
+        //     &spl_token::instruction::burn(
+
+        //     )
+        // )
 
         // Program sends LSU to claimer
         // invoke_signed()
