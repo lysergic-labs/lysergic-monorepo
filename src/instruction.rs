@@ -180,6 +180,7 @@ pub fn redeem_from_pt(
     lsu_mint: &Pubkey,
     pt_mint: &Pubkey,
     lsu_vault: &Pubkey,
+    pt_vault: &Pubkey,
     redeemer_lsu_ata: &Pubkey,
     redeemer_pt_ata: &Pubkey,
     amount: u64,

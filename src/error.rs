@@ -27,6 +27,8 @@ pub enum YieldTokenizerError {
     InvalidVault,
     #[error("Expired")]
     Expired,
+    #[error("Has not reached maturity")]
+    Immature,
 }
 
 impl From<YieldTokenizerError> for ProgramError {
@@ -59,6 +61,7 @@ impl PrintProgramError for YieldTokenizerError {
             YieldTokenizerError::InvalidVault => {
                 msg!("The provided LSU vault address is incorrect")
             }
+            YieldTokenizerError::Immature => msg!("Has not reached maturity"),
         }
     }
 }

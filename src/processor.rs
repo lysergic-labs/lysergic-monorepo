@@ -62,6 +62,8 @@ impl YieldTokenizer {
         let pt_mint = next_account_info(accounts_iter)?;
         let yt_mint = next_account_info(accounts_iter)?;
         let lsu_vault = next_account_info(accounts_iter)?;
+        let pt_vault = next_account_info(accounts_iter)?;
+        let yt_vault = next_account_info(accounts_iter)?;
         let token_program = next_account_info(accounts_iter)?;
         let atoken_program = next_account_info(accounts_iter)?;
         let system_program = next_account_info(accounts_iter)?;
@@ -76,14 +78,10 @@ impl YieldTokenizer {
         if yield_tokenizer.key != &get_yield_tokenizer_address(lsu_mint.key, dummy_clock_expiry) {
             return Err(YieldTokenizerError::InvalidYieldTokenizerAddress.into());
         }
-        if pt_mint.key
-            != &get_principal_token_address(yield_tokenizer.key, lsu_mint.key, dummy_clock_expiry)
-        {
+        if pt_mint.key != &get_principal_token_address(yield_tokenizer.key) {
             return Err(YieldTokenizerError::InvalidPrincipalToken.into());
         }
-        if yt_mint.key
-            != &get_yield_token_address(yield_tokenizer.key, lsu_mint.key, dummy_clock_expiry)
-        {
+        if yt_mint.key != &get_yield_token_address(yield_tokenizer.key) {
             return Err(YieldTokenizerError::InvalidYieldToken.into());
         }
         if lsu_vault.key != &get_associated_token_address(yield_tokenizer.key, lsu_mint.key) {
@@ -207,6 +205,30 @@ impl YieldTokenizer {
             )?;
         }
 
+        // We also need to instantiate vaults for the PT and YT for burns
+        if pt_vault.owner != token_program.key {
+            invoke_signed(
+                &spl_associated_token_account::instruction::create_associated_token_account(
+                    authority.key,
+                    yield_tokenizer.key,
+                    pt_mint.key,
+                    token_program.key,
+                )?,
+                &[],
+            )
+        }
+
+        if yt_vault.owner != token_program.key {
+            invoke_signed(
+                &spl_associated_token_account::instruction::create_associated_token_account(
+                    authority.key,
+                    yield_tokenizer.key,
+                    yt_mint,
+                    token_program.key,
+                ),
+            )
+        }
+
         let yield_tokenizer_data = YieldTokenizerState {
             pt: *pt_mint.key,
             yt: *yt_mint.key,
@@ -300,17 +322,21 @@ impl YieldTokenizer {
         // Get average yield of underlying at current timestamp
 
         // Deposit LSU amount into LSU token vault
+        // invoke()
 
         // Mint corresponding PT
+        // invoke_signed()
 
         // Mint corresponding YT
+        // invoke_signed()
 
         // Transfer PT to buyer
+        //invoke_signed()
 
         // Transfer YT to buyer
+        // invoke_signed()
 
         // Update yield tokenizer state
-
         yield_tokenizer_data.serialize(&mut &mut yield_tokenizer.data.borrow_mut()[..])?;
 
         Ok(())
@@ -384,6 +410,21 @@ impl YieldTokenizer {
             return Err(ProgramError::IncorrectProgramId);
         }
 
+        // Transfer PT
+        // invoke()
+
+        // Transfer YT
+        // invoke()
+
+        // Burn PT
+        // invoke_signed()
+
+        // Burn YT
+        // invoke_signed()
+
+        // Transfer LSU
+        // invoke_signed()
+
         yield_tokenizer_data.serialize(&mut &mut yield_tokenizer.data.borrow_mut()[..])?;
         Ok(())
     }
@@ -400,6 +441,7 @@ impl YieldTokenizer {
         let lsu_mint = next_account_info(accounts_iter)?;
         let pt_mint = next_account_info(accounts_iter)?;
         let lsu_vault = next_account_info(accounts_iter)?;
+        let pt_vault = next_account_info(accounts_iter)?;
         let redeemer_lsu_ata = next_account_info(accounts_iter)?;
         let redeemer_pt_ata = next_account_info(accounts_iter)?;
         let token_program = next_account_info(accounts_iter)?;
@@ -445,11 +487,68 @@ impl YieldTokenizer {
             return Err(ProgramError::IncorrectProgramId);
         }
         // Check if expiry has elapsed
+        if clock.unix_timestamp < yield_tokenizer_data.maturity_date {
+            return Err(YieldTokenizerError::Immature.into());
+        }
 
         // Send PT to program
+        invoke(
+            &spl_token::instruction::transfer(
+                token_program.key,
+                redeemer_pt_ata.key,
+                pt_vault.key,
+                yield_tokenizer.key,
+                &[],
+                amount,
+            )?,
+            &[
+                redeemer_pt_ata.clone(),
+                pt_vault.clone(),
+                redeemer.clone(),
+                token_program.clone(),
+            ],
+        )?;
+
         // Program burns PT
+        invoke_signed(
+            &spl_token::instruction::burn(
+                token_program.key,
+                pt_vault.key,
+                pt_mint.key,
+                yield_tokenizer.key,
+                &[yield_tokenizer.key],
+                amount,
+            )?,
+            &[pt_vault.clone(), pt_mint.clone(), yield_tokenizer.clone()],
+            &[&[
+                crate::LSD_SEED,
+                yield_tokenizer_data.lsu_mint.as_ref(),
+                &yield_tokenizer_data.maturity_date.to_le_bytes(),
+            ]],
+        )?;
 
         // Program sends LSU to redeemer
+        invoke_signed(
+            &spl_token::instruction::transfer(
+                token_program.key,
+                lsu_vault.key,
+                redeemer_lsu_ata.key,
+                yield_tokenizer.key,
+                &[yield_tokenizer.key],
+                amount,
+            )?,
+            &[
+                lsu_vault.clone(),
+                redeemer_lsu_ata.clone(),
+                yield_tokenizer.clone(),
+                token_program.clone(),
+            ],
+            &[&[
+                crate::LSD_SEED,
+                yield_tokenizer_data.lsu_mint.as_ref(),
+                &yield_tokenizer_data.maturity_date.to_le_bytes(),
+            ]],
+        )?;
 
         // Update program state
         yield_tokenizer_data.serialize(&mut &mut yield_tokenizer.data.borrow_mut()[..])?;
@@ -513,16 +612,37 @@ impl YieldTokenizer {
             return Err(ProgramError::IncorrectProgramId);
         }
         // Check if expiry has elapsed
+        if clock.unix_timestamp >= yield_tokenizer_data.maturity_date {
+            return Err(YieldTokenizerError::Expired.into());
+        }
 
         // Get accrued yield
 
         // Send YT to program
+        invoke(
+            &spl_token::instruction::transfer(
+                token_program.key,
+                claimer_yt_ata.key,
+                yt_vault.key,
+                claimer.key,
+                &[claimer.key],
+                amount,
+            )?,
+            &[
+                claimer_yt_ata.clone(),
+                yt_vault.clone(),
+                claimer.clone(),
+                token_program.clone(),
+            ],
+        )?;
 
         // Program burns YT
 
         // Program sends LSU to claimer
+        // invoke_signed()
 
         // Update program state
+        yield_tokenizer_data.serialize(&mut &mut yield_tokenizer.data.borrow_mut()[..])?;
 
         Ok(())
     }

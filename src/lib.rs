@@ -29,36 +29,30 @@ pub fn get_yield_tokenizer_address(lsu_mint: &Pubkey, maturity_date: i64) -> Pub
     yield_tokenizer_addr
 }
 
-pub fn get_yield_token_address(
-    yield_tokenizer: &Pubkey,
+pub fn get_yield_token_address_from_lsu_and_expiry(
     lsu_mint: &Pubkey,
     maturity_date: i64,
 ) -> Pubkey {
-    let (yield_token_addr, _) = Pubkey::find_program_address(
-        &[
-            yield_tokenizer.as_ref(),
-            lsu_mint.as_ref(),
-            &maturity_date.to_le_bytes(),
-        ],
-        &crate::id(),
-    );
+    get_yield_token_address(&get_yield_tokenizer_address(lsu_mint, maturity_date))
+}
+
+pub fn get_yield_token_address(yield_tokenizer: &Pubkey) -> Pubkey {
+    let (yield_token_addr, _) =
+        Pubkey::find_program_address(&[yield_tokenizer.as_ref(), crate::YT_SEED], &crate::id());
 
     yield_token_addr
 }
 
-pub fn get_principal_token_address(
-    yield_tokenizer: &Pubkey,
+pub fn get_principal_token_address_from_lsu_and_expiry(
     lsu_mint: &Pubkey,
     maturity_date: i64,
 ) -> Pubkey {
-    let (principal_token_addr, _) = Pubkey::find_program_address(
-        &[
-            yield_tokenizer.as_ref(),
-            lsu_mint.as_ref(),
-            &maturity_date.to_le_bytes(),
-        ],
-        &crate::id(),
-    );
+    get_principal_token_address(&get_yield_tokenizer_address(lsu_mint, maturity_date))
+}
+
+pub fn get_principal_token_address(yield_tokenizer: &Pubkey) -> Pubkey {
+    let (principal_token_addr, _) =
+        Pubkey::find_program_address(&[yield_tokenizer.as_ref(), crate::PT_SEED], &crate::id());
 
     principal_token_addr
 }
