@@ -1,0 +1,24 @@
+[package]
+name = "yield-tokenizer"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+borsh = { version = "1.4.0", features = ["derive"] }
+num-derive = "0.4.2"
+num-traits = "0.2.18"
+solana-frozen-abi = "=1.18.9"
+solana-program = "1.18.9"
+spl-associated-token-account = "3.0.2"
+spl-token = "=4.0.0"
+thiserror = "1.0.58"
+
+[dev-dependencies]
+solana-program-test = "1.18.9"
+solana-frozen-abi = "=1.18.9"
+ 
+[lib]
+name = "yield_tokenizer"
+crate-type = ["cdylib", "lib"]
