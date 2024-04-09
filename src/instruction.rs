@@ -80,6 +80,7 @@ pub enum YieldTokenizerInstruction {
     ClaimYield,
 }
 
+/// Initialize a Yield Tokenizer for a specific maturity and liquid staking unit
 pub fn init_yield_tokenizer(
     program_id: &Pubkey,
     authority: &Pubkey,
@@ -107,6 +108,7 @@ pub fn init_yield_tokenizer(
     ))
 }
 
+/// Tokenize a liquid staking unit into a principal token and a yield token
 pub fn tokenize_yield(
     buyer: &Pubkey,
     yield_tokenizer: &Pubkey,
@@ -138,6 +140,8 @@ pub fn tokenize_yield(
     ))
 }
 
+/// Redeem a liquid staking unit from a principal token + yield token, the PT and YT must be in
+/// 1:1 ratio
 pub fn redeem(
     redeemer: &Pubkey,
     yield_tokenizer: &Pubkey,
@@ -169,6 +173,7 @@ pub fn redeem(
     ))
 }
 
+/// Redeem a liquid staking unit from a principal token only - can only be called after expiry
 pub fn redeem_from_pt(
     redeemer: &Pubkey,
     yield_tokenizer: &Pubkey,
@@ -196,6 +201,7 @@ pub fn redeem_from_pt(
     ))
 }
 
+/// Collect yield owed from holding a yield token
 pub fn claim_yield(
     claimer: &Pubkey,
     yield_tokenizer: &Pubkey,
