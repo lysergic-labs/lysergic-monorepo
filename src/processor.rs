@@ -501,6 +501,18 @@ impl YieldTokenizer {
         )
 
         // Burn YT
+        invoke_signed(
+            &spl_token::instruction::burn(
+                token_program.key,
+
+
+
+                
+            )?,
+            &[&[
+                
+            ]],
+        )?;
         // invoke_signed()
 
         // Transfer LSU
