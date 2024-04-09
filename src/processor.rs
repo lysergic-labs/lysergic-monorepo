@@ -21,6 +21,8 @@ use {
     spl_token,
 };
 
+const YEAR_SEC: usize = 31_536_000;
+
 struct YieldTokenizer {}
 
 impl YieldTokenizer {
@@ -72,10 +74,14 @@ impl YieldTokenizer {
         let clock = clock::Clock::get()?;
 
         //TODO: Change this to be the maturity date - 0000 UTC
-        let dummy_clock_expiry = clock.unix_timestamp as i64;
+        let expiry = match expiry {
+            Expiry::TwelveMonths => clock.unix_timestamp + YEAR_SEC as i64,
+            Expiry::EighteenMonths => clock.unix_timestamp + (YEAR_SEC as f64 * 1.5) as i64,
+            Expiry::TwentyFourMonths => clock.unix_timestamp + (YEAR_SEC * 2) as i64,
+        };
 
         // Safety Checks
-        if yield_tokenizer.key != &get_yield_tokenizer_address(lsu_mint.key, dummy_clock_expiry) {
+        if yield_tokenizer.key != &get_yield_tokenizer_address(lsu_mint.key, expiry) {
             return Err(YieldTokenizerError::InvalidYieldTokenizerAddress.into());
         }
         if pt_mint.key != &get_principal_token_address(yield_tokenizer.key) {
@@ -101,7 +107,7 @@ impl YieldTokenizer {
             &[
                 crate::LSD_SEED,
                 lsu_mint.key.as_ref(),
-                &dummy_clock_expiry.to_le_bytes(),
+                &expiry.to_le_bytes(),
             ],
             program_id,
         );
@@ -132,7 +138,7 @@ impl YieldTokenizer {
                 &[&[
                     crate::LSD_SEED,
                     lsu_mint.key.as_ref(),
-                    &dummy_clock_expiry.to_le_bytes(),
+                    &expiry.to_le_bytes(),
                     &[bump],
                 ]],
             )?;
@@ -143,7 +149,7 @@ impl YieldTokenizer {
                 &[&[
                     crate::LSD_SEED,
                     lsu_mint.key.as_ref(),
-                    &dummy_clock_expiry.to_le_bytes(),
+                    &expiry.to_le_bytes(),
                     &[bump],
                 ]],
             )?;
@@ -746,6 +752,13 @@ impl YieldTokenizer {
         yield_tokenizer_data.serialize(&mut &mut yield_tokenizer.data.borrow_mut()[..])?;
 
         Ok(())
+    }
+
+    fn get_pt_value(ib_token_price: f64, token_price: f64, now: i64) -> i64 {
+        (1i64 - (
+            token_price as i64 / 
+                (ib_token_price as i64 ^ YEAR_SEC as i64 / (YEAR_SEC as i64 - now))))
+        + 1i64
     }
 
     fn validate_lsu() -> Result<(), ProgramError> {
