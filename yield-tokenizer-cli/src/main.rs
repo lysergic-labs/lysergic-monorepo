@@ -42,16 +42,16 @@ enum Commands {
     Redeem {
         amount: u64,
         lsu_mint: &Pubkey,
-        expiry: yield_tokenizer::instruction::Pubkey,
+        expiry: yield_tokenizer::instruction::Expiry,
     },
     RedeemPt {
         amount: u64,
         lsu_mint: &Pubkey,
-        expiry:: yield_tokenizer::instruction::Pubkey,
+        expiry: yield_tokenizer::instruction::Expiry,
     },
     Claim {
         lsu_mint: &Pubkey,
-        expiry: yield_tokenizer::instruction::Pubkey,
+        expiry: yield_tokenizer::instruction::Expiry,
     },
 }
 
@@ -77,12 +77,102 @@ fn main() -> Result<()> {
 
     match args.commands {
         Commands::Init { lsu_mint, expiry } => {
-            ix = yield_tokenizer::instruction::init_yield_tokenizer(yield_tokenizer::id(), wallet_pubkey)
+            ix = yield_tokenizer::instruction::init_yield_tokenizer(
+                yield_tokenizer::id(),
+                wallet_pubkey,
+            )
         }
-        Commands::Tokenize { amount } => unimplemented!(),
-        Commands::Redeem { amount } => unimplemented!(),
-        Commands::RedeemPt { amount } => unimplemented!(),
-        Commands::Claim => unimplemented!(),
+        Commands::Tokenize {
+            amount,
+            lsu_mint,
+            expiry,
+        } => {
+            let yield_tokenizer_addr =
+                yield_tokenizer::get_yield_tokenizer_address(lsu_mint, expiry);
+            let pt_addr = yield_tokenizer::get_principal_token_address(yield_tokenizer_addr);
+            let yt_addr = yield_tokenizer::get_yield_token_address(yield_tokenizer_addr);
+            ix = yield_tokenizer::instruction::tokenize_yield(
+                wallet_pubkey,
+                yield_tokenizer_addr,
+                lsu_mint,
+                pt_addr,
+                yt_addr,
+                spl_associated_token_account::get_associated_token_account(
+                    yield_tokenizer_addr,
+                    lsu_mint,
+                ),
+                spl_associated_token_account::get_associated_token_account(wallet_pubkey, lsu_mint),
+                spl_associated_token_account::get_associated_token_account(wallet_pubkey, pt_addr),
+                spl_associated_token_account::get_associated_token_account(wallet_pubkey, yt_addr),
+                amount,
+            )
+        }
+        Commands::Redeem {
+            amount,
+            lsu_mint,
+            expiry,
+        } => {
+            let yield_tokenizer_addr =
+                yield_tokenizer::get_yield_tokenizer_address(lsu_mint, expiry);
+            let pt_addr = yield_tokenizer::get_principal_token_address(yield_tokenizer_addr);
+            let yt_addr = yield_tokenizer::get_yield_token_address(yield_tokenizer_addr);
+            ix = yield_tokenizer::instruction::redeem(
+                wallet_pubkey,
+                yield_tokenizer_addr,
+                lsu_mint,
+                pt_addr,
+                yt_addr,
+                spl_associated_token_account::get_associated_token_account(
+                    yield_tokenizer_addr,
+                    lsu_mint,
+                ),
+                spl_associated_token_account::get_associated_token_account(wallet_pubkey, lsu_mint),
+                spl_associated_token_account::get_associated_token_account(wallet_pubkey, pt_addr),
+                spl_associated_token_account::get_associated_token_account(wallet_pubkey, yt_addr),
+                amount,
+            )
+        }
+        Commands::RedeemPt {
+            amount,
+            lsu_mint,
+            expiry,
+        } => {
+            let yield_tokenizer_addr =
+                yield_tokenizer::get_yield_tokenizer_address(lsu_mint, expiry);
+            let pt_addr = yield_tokenizer::get_principal_token_address(yield_tokenizer_addr);
+            ix = yield_tokenizer::instruction::redeem_from_pt(
+                wallet_pubkey,
+                yield_tokenizer_addr,
+                pt_addr,
+                spl_associated_token_account::get_associated_token_account(
+                    yield_tokenizer_addr,
+                    lsu_mint,
+                ),
+                spl_associated_token_account::get_associated_token_account(wallet_pubkey, lsu_mint),
+                spl_associated_token_account::get_associated_token_account(wallet_pubkey, pt_addr),
+                amount,
+            )
+        }
+        Commands::Claim { lsu_mint, expiry } => {
+            let yield_tokenizer_addr =
+                yield_tokenizer::get_yield_tokenizer_address(lsu_mint, expiry);
+            let yt_addr = yield_tokenizer::get_yield_token_address(yield_tokenizer_addr);
+            ix = yield_tokenizer::instruction::redeem(
+                wallet_pubkey,
+                yield_tokenizer_addr,
+                yt_addr,
+                spl_associated_token_account::get_associated_token_account(
+                    yield_tokenizer_addr,
+                    lsu_mint,
+                ),
+                spl_associated_token_account::get_associated_token_account(
+                    yield_tokenizer_addr,
+                    yt_addr,
+                ),
+                spl_associated_token_account::get_associated_token_account(wallet_pubkey, lsu_mint),
+                spl_associated_token_account::get_associated_token_account(wallet_pubkey, yt_addr),
+            )
+        }
     }
 
     let mut tx = Transaction::new_with_payer(&[instruction], Some(&wallet_pubkey));
