@@ -1,0 +1,70 @@
+.spine {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+
+  .wallet-bar {
+    position: fixed;
+    width: 100%;
+    display: flex;
+    background: #0c0927;
+    justify-content: space-between;
+  }
+
+  .mask {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    @media screen and (max-width: 1024px) {
+      width: 100vw;
+    }
+    top: 0;
+    left: 0;
+    background: none;
+    transition: 0.125s opacity ease-out;
+    pointer-events: none;
+
+    &.visible {
+      background-color: #00000080;
+      pointer-events: all;
+    }
+
+    .modal {
+      position: fixed;
+      top: 188px;
+      width: 420px;
+      @media screen and (max-width: 480px) {
+        width: calc(100vw - 30px);
+      }
+      background: #2b292b;
+      color: #ffffff;
+      border-radius: 8px;
+      left: calc(50vw - 210px);
+      padding: 16px;
+
+      &.cancel {
+        margin-top: 69px;
+        .modal-header {
+          margin-bottom: 69px;
+        }
+      }
+
+      .modal-header {
+        position: relative;
+        width: 100%;
+        text-align: center;
+        font-weight: 500;
+        height: 40px;
+        border-bottom: 1px solid #ffffff45;
+        .close {
+          position: absolute;
+          top: 0;
+          right: 0;
+          cursor: pointer;
+          color: #ffffff45;
+        }
+      }
+    }
+  }
+}

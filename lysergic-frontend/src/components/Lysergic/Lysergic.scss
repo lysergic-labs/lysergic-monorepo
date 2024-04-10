@@ -1,0 +1,385 @@
+@font-face {
+  font-family: "Plex Sans";
+  src: url("/fonts/IBMPlexSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Plex Sans";
+  src: url("/fonts/IBMPlexSans-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Plex Sans";
+  src: url("/fonts/IBMPlexSans-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Plex Sans";
+  src: url("/fonts/IBMPlexSans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Plex Sans";
+  src: url("/fonts/IBMPlexSans-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Plex Sans";
+  src: url("/fonts/IBMPlexSans-ExtraLight.ttf") format("truetype");
+  font-weight: 200;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Plex Sans";
+  src: url("/fonts/IBMPlexSans-Thin.ttf") format("truetype");
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Plex Sans";
+  src: url("/fonts/IBMPlexSans-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Plex Sans";
+  src: url("/fonts/IBMPlexSans-SemiBoldItalic.ttf") format("truetype");
+  font-weight: 600;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Plex Sans";
+  src: url("/fonts/IBMPlexSans-MediumItalic.ttf") format("truetype");
+  font-weight: 500;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Plex Sans";
+  src: url("/fonts/IBMPlexSans-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Plex Sans";
+  src: url("/fonts/IBMPlexSans-LightItalic.ttf") format("truetype");
+  font-weight: 300;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Plex Sans";
+  src: url("/fonts/IBMPlexSans-ExtraLightItalic.ttf") format("truetype");
+  font-weight: 200;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Plex Sans";
+  src: url("/fonts/IBMPlexSans-ThinItalic.ttf") format("truetype");
+  font-weight: 100;
+  font-style: italic;
+}
+
+@keyframes typein {
+  0% {
+    color: #0c0927;
+  }
+  50% {
+    color: #707070;
+  }
+  100% {
+    color: #0c0927;
+  }
+}
+
+.lysergic {
+  width: 100vw;
+
+  .banner {
+    display: flex;
+    width: 100%;
+    height: 200px;
+    background: #0c0927;
+
+    h1 {
+      font-family: "Plex Sans";
+      font-weight: 500;
+      font-size: 64px;
+      color: #0c0927;
+      transition: color 0.25s ease-in;
+
+      &.animate {
+        color: #707070;
+      }
+      &.d1 {
+        transition-delay: 0.25s;
+      }
+      &.d2 {
+        transition-delay: 0.5s;
+      }
+      &.d3 {
+        transition-delay: 0.75s;
+      }
+      &.d4 {
+        transition-delay: 1s;
+      }
+      &.d5 {
+        transition-delay: 1.25s;
+      }
+      &.d6 {
+        transition-delay: 1.5s;
+      }
+      &.d7 {
+        transition-delay: 1.75s;
+      }
+      &.d8 {
+        transition-delay: 2s;
+      }
+      &.blinker {
+        animation-name: typein;
+        animation-duration: 3s;
+        animation-delay: 2.25s;
+        animation-iteration-count: infinite;
+      }
+    }
+  }
+
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    button {
+      border-radius: 2px;
+      padding: 2px 6px;
+      background: #ffffff10;
+      color: #ffc304;
+    }
+  }
+
+  .rows {
+    height: calc(100vh - 288px);
+    background: #0c0927;
+  }
+
+  .row {
+    height: 169px;
+  }
+
+  .sort-headers {
+    height: 88px;
+  }
+
+  .sort-headers,
+  .row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: #0c0927;
+
+    .sort-header,
+    .row-col {
+      display: flex;
+      padding: 0 0 0 15px;
+      font-family: "Plex Sans";
+      font-size: 18px;
+
+      &.twofifths {
+        width: calc(40% - 30px);
+        @media screen and (max-width: 1024px) {
+          width: 69px;
+        }
+      }
+      &.third {
+        width: calc(33% - 30px);
+        @media screen and (max-width: 1024px) {
+          width: 69px;
+        }
+      }
+      &.fifth {
+        width: calc(20% - 30px);
+        @media screen and (max-width: 1024px) {
+          width: 69px;
+        }
+      }
+      &.twelve {
+        width: calc(12% - 30px);
+        @media screen and (max-width: 1024px) {
+          width: 110px;
+          text-wrap: wrap;
+          word-break: break-word;
+        }
+      }
+      &.tenth {
+        width: calc(10% - 30px);
+        @media screen and (max-width: 1024px) {
+          width: 69px;
+        }
+      }
+      &.eight {
+        width: calc(8% - 30px);
+        @media screen and (max-width: 1024px) {
+          width: 88px;
+          text-wrap: wrap;
+          word-break: break-word;
+        }
+      }
+      &.twentieth {
+        width: calc(5% - 30px);
+        @media screen and (max-width: 1024px) {
+          width: 69px;
+        }
+      }
+      &.align-right {
+        justify-content: right;
+        padding: 0 15px 0 0;
+      }
+
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        button {
+          border-radius: 2px;
+          padding: 2px 6px;
+          background: #ffffff10;
+          color: #ffc304;
+        }
+      }
+    }
+    .row-col.green {
+      color: #13f3a3;
+    }
+    .row-col.red {
+      color: #ff4040;
+    }
+  }
+  .sort-headers {
+    @media screen and (max-width: 1024px) {
+      width: 100%;
+      flex-wrap: wrap;
+      height: fit-content;
+      row-gap: 8px;
+      margin-bottom: 16px;
+    }
+    .sort-header {
+      cursor: pointer;
+      color: #707070;
+      .sort {
+        display: flex;
+        flex-direction: column;
+        font-size: 10px;
+        padding: 0 0 0 3px;
+        .active {
+          color: #ffc304;
+        }
+      }
+    }
+  }
+  .row {
+    color: #fff;
+    @media screen and (max-width: 1024px) {
+      flex-wrap: wrap;
+      height: fit-content;
+      row-gap: 8px;
+      margin-bottom: 8px;
+      border-radius: 2px;
+      border: 1px solid grey;
+    }
+  }
+
+  .flex-row {
+    display: flex;
+    transition: height 0.5s ease-in;
+    &.wrap {
+      flex-wrap: wrap;
+    }
+    &.reverse {
+      flex-direction: row-reverse;
+    }
+    &.card-padding {
+      padding-left: 15px;
+      &.dbl {
+        padding: 0 15px;
+      }
+    }
+    &.top-padding {
+      padding-top: 8px;
+    }
+    &.tb-margin {
+      margin: 15px 0;
+    }
+    &.t-margin {
+      margin-top: 15px;
+    }
+    &.gap-eight {
+      gap: 8px;
+    }
+    &.date-filter {
+      @media screen and (max-width: 1024px) {
+        width: 300px;
+        flex-wrap: wrap;
+      }
+      .date-filter-tab {
+        border-radius: 2px;
+        padding: 3px 8px;
+        background: none;
+        color: #000;
+        cursor: pointer;
+
+        &.active {
+          border: 1px solid #000;
+        }
+      }
+    }
+    &.remainheight {
+      height: calc(100vh - 715px);
+      @media screen and (max-width: 1024px) {
+        height: fit-content;
+      }
+    }
+    &.top {
+      height: 600px;
+      transition: height 0.5s ease-out;
+      &.maxed {
+        height: 30px;
+      }
+      @media screen and (max-width: 1024px) {
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
+
+    button.buy {
+      flex-grow: 1;
+      background: #13f3a3;
+      color: #ffffff;
+    }
+    button.sell {
+      flex-grow: 1;
+      background: #ff4040;
+      color: #ffffff;
+    }
+  }
+
+  .flex-col {
+    display: flex;
+    flex-direction: column;
+    &.core {
+      padding-top: 64px;
+      @media screen and (max-width: 1024px) {
+        gap: 480px;
+        padding-top: 0;
+      }
+    }
+    &.gap69 {
+      gap: 69px;
+    }
+    &.text-center {
+      text-align: center;
+    }
+  }
+}
